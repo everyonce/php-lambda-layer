@@ -24,7 +24,7 @@ function start_webserver() {
       $handler_filename = array_pop($handler_components);
       $handler_path = implode('/', array_merge(['/var/task'], $handler_components));
       chdir($handler_path);
-      exec("PHP_INI_SCAN_DIR=/opt/etc/php-7.${phpMinorVersion}.d/:/var/task/php-7.${phpMinorVersion}.d/ php -S localhost:8000 -c /var/task/php.ini -d extension_dir=/opt/lib/php/7.${phpMinorVersion}/modules '$handler_filename'");
+      exec("PHP_INI_SCAN_DIR=/opt/:/opt/etc/php-7.${phpMinorVersion}.d/:/var/task/php-7.${phpMinorVersion}.d/ php -S localhost:8000 -c /var/task/php.ini -d extension_dir=/opt/lib/php/7.${phpMinorVersion}/modules '$handler_filename'");
       exit;
 
     default:
@@ -139,6 +139,7 @@ while (true) {
         if ($value != '') {
           $uri .= '=' . $value;
         }
+        printf('param: '.$value); 
       }
     }
   }
@@ -212,9 +213,10 @@ while (true) {
     return strlen($header);
   });
 
+    // $response['multiValueHeaders']['Content-Type']=array();
+    // array_push($response['multiValueHeaders']['Content-Type'], 'text/html');
   curl_setopt($ch, CURLOPT_WRITEFUNCTION, function ($ch, $chunk) use (&$response) {
     $response['body'] .= $chunk;
-
     return strlen($chunk);
   });
 
@@ -237,6 +239,7 @@ while (true) {
   curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
   curl_setopt($ch, CURLOPT_POSTFIELDS, $response_json);
+        printf('response_json: '.$response_json); 
   if (!$isALB){
     curl_setopt($ch, CURLOPT_HTTPHEADER, array(
       'Content-Type: application/json',
